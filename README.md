@@ -7,6 +7,9 @@
 
 <img width="1920" height="1009" alt="image" src="https://github.com/user-attachments/assets/f93c5ae9-50aa-4a95-997d-bfedad8f2091" />
 
+<img width="600" height="400" alt="RK4" src="https://github.com/user-attachments/assets/93b2ebba-8a53-49f4-bbc1-3e157a1e7d5e" />
+
+
 
 <?xml version="1.0" encoding="utf-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="700" height="700" viewBox="0 0 2800 2800">
