@@ -1,0 +1,59 @@
+using GLMakie, GLMakie.GLFW, LaTeXStrings
+
+# 1. Setup
+monitor = GLFW.GetPrimaryMonitor()
+videomode = GLFW.GetVideoMode(monitor)
+GLMakie.activate!(inline=false, fullscreen=true) 
+
+# 2. Dracula Theme
+d_bg = "#282a36"; d_fg = "#f8f8f2"; d_sel = "#44475a"; d_pink = "#ff79c6"; d_cyan = "#8be9fd"
+set_theme!(Theme(backgroundcolor = d_bg, textcolor = d_fg))
+
+fig = Figure(size = (videomode.width, videomode.height))
+
+# 3. FIX: Create a dedicated grid layout for the plot vs controls
+# Plot on the left (cols 1-2), Controls on the right (col 3)
+ax = Axis(fig[1:2, 1:2], 
+    title = "Mass-Spring-Damper System",
+    backgroundcolor = d_sel,
+    xlabel = "Time (s)", ylabel = "Displacement"
+)
+
+# 4. FIX: Use a Nested Layout for the side panel to keep things tight
+side_panel = fig[1:2, 3] = GridLayout()
+
+sg = SliderGrid(
+    side_panel[1, 1],
+    (label = "Mass (m)", range = 0.5:0.1:5, startvalue = 1.0),
+    (label = "Spring (k)", range = 1.0:0.5:20, startvalue = 10.0),
+    (label = "Damping (c)", range = 0.0:0.1:5, startvalue = 0.5),
+    width = 350, tellheight = false
+)
+
+Label(side_panel[2, 1], L"m \ddot{x} + c \dot{x} + kx = 0", 
+    fontsize = 40, color = d_cyan, tellheight = false)
+
+# 5. FIX: Force the plot columns to expand and the slider column to stay slim
+colsize!(fig.layout, 1, Relative(0.4))
+colsize!(fig.layout, 2, Relative(0.4))
+colsize!(fig.layout, 3, Fixed(400)) 
+
+# 6. Physics
+t = 0:0.01:10
+y = lift(sg.sliders[1].value, sg.sliders[2].value, sg.sliders[3].value) do m, k, c
+    ωn = sqrt(k/m)
+    ζ = c / (2 * sqrt(m*k))
+    if ζ < 1.0
+        ωd = ωn * sqrt(1 - ζ^2)
+        return exp.(-ζ * ωn * t) .* cos.(ωd * t)
+    elseif ζ == 1.0
+        return (1 .+ ωn .* t) .* exp.(-ωn .* t)
+    else
+        r1 = -ωn*(ζ-sqrt(ζ^2-1)); r2 = -ωn*(ζ+sqrt(ζ^2-1))
+        return 0.5 .* (exp.(r1.*t) .+ exp.(r2.*t))
+    end
+end
+
+lines!(ax, t, y, color = d_pink, linewidth = 5)
+
+display(fig)
